@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import java.awt.*;
 
 public class TicTacToe implements Runnable{
   public JPanel inputPane;
@@ -43,46 +45,53 @@ public class TicTacToe implements Runnable{
   public void run() {
     this.packAll();
   }
-  
+
   
   private void actionListeners(){
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        final int fI = i;
-        final int fJ = j;
-        this.buttons[i][j].addActionListener(e -> {
+    int rowIndex = 0;
+    for (JButton[] buttonRow : buttons){
+      int columnIndex = 0;
+      for (JButton button : buttonRow){
+        final JButton btn = button;
+        final int finalRowIndex = rowIndex;
+        final int finalColIndex = columnIndex;
+        button.addActionListener(e -> {
+          ttl.appendCounter(); btn.setText(ttl.returnStr()); btn.setEnabled(false);
           bufferField.setText(" ");
-          ttl.appendCounter();
-          ttl.updateArray(fI, fJ, ttl.returnStr());
-          buttons[fI][fJ].setText(ttl.returnStr());
+          this.removeButtonHighlights();
+          ttl.updateArray(finalRowIndex, finalColIndex, ttl.returnStr());
           
-          ttl.logMove(fI+" "+fJ);
+          ttl.logMove(finalRowIndex+" "+finalColIndex);
           if(ttl.getRemovedElement() != null){
             removeButtonText(ttl.getRemovedElement());
           }
           
+          ttl.printBoard();
           this.victoryCheck();
-          buttons[fI][fJ].setEnabled(false);
+          if (!ttl.winCondition()){
+            this.highlightNextOut(ttl.returnNextOut());
+          }
         });
+        columnIndex++;
       }
+      rowIndex++;
     }
     resetGameButton.addActionListener(e -> {
       resetGame();
     });
-    
   }
   
+  
   private void resetGame() {
+    this.removeButtonHighlights();
     bufferField.setText("Game has been reset");
-    ttl.flushGame();
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        this.buttons[i][j].setText(" ");
-      }
-    }
+    ttl = new TicTacToeLogic();
+    
+    ttl.printBoard();
     for (JButton[] button : buttons) {
       for (JButton button1 : button) {
         button1.setEnabled(true);
+        button1.setText(" ");
       }
     }
   }
@@ -111,4 +120,29 @@ public class TicTacToe implements Runnable{
     buttons[row][col].setText(" ");
     buttons[row][col].setEnabled(true);
   }
+  
+  private void highlightNextOut(String key){
+    if (key == null){
+      return;
+    }
+    String i = String.valueOf(key.charAt(0));
+    String j = String.valueOf(key.charAt(key.length()-1));
+    
+    int row = Integer.parseInt(i);
+    int col = Integer.parseInt(j);
+    
+    if (ttl.counter > 6) {
+      buttons[row][col].setBorderPainted(true);
+      buttons[row][col].setBorder(new LineBorder(Color.RED, 2));
+    }
+  }
+  
+  private void removeButtonHighlights(){
+    for (JButton[] button : buttons) {
+      for (JButton button1 : button) {
+        button1.setBorder(resetGameButton.getBorder());
+      }
+    }
+  }
+  
 }

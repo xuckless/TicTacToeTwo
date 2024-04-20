@@ -1,7 +1,8 @@
+import java.awt.desktop.SystemEventListener;
+
 public class TicTacToeLogic {
   String table[][];
   int counter;
-  int moveCount;
   String moveLogger[];
   String removedElement = null;
   
@@ -9,23 +10,25 @@ public class TicTacToeLogic {
     this.table = new String[3][3];
     this.moveLogger = new String[7];
     this.counter = 0;
-    this.moveCount = 0;
   }
   
   void appendCounter(){
-    this.counter+=1;
+    this.counter++;
   }
   void logMove(String key){
-    if (this.moveCount < 7){
-      moveLogger[moveCount] = key;
-      moveCount++;
+//    if (this.moveCount < 7){
+//      moveLogger[moveCount] = key;
+//      moveCount++;
+//    }
+    if (this.counter-1 <= 6){
+      moveLogger[counter-1] = key;
     }
     else {
       for (int i = 0; i < 6; i++) {
         removedElement = moveLogger[0];
         moveLogger[i] = moveLogger[i + 1];
       }
-      moveLogger[6] = key;
+      moveLogger[moveLogger.length-1] = key;
       this.removeFromArray(removedElement);
     }
   }
@@ -51,6 +54,10 @@ public class TicTacToeLogic {
     return false;
   }
   
+  int getCounter(){
+    return counter;
+  }
+  
   String returnStr(){
     if (counter % 2 == 0){
       return "O";
@@ -59,7 +66,7 @@ public class TicTacToeLogic {
   }
   
   void updateArray(int row, int col, String returnStr){
-    table[row][col] = returnStr;
+    table[col][row] = returnStr;
   }
   
   void removeFromArray(String key){
@@ -69,14 +76,17 @@ public class TicTacToeLogic {
     int row = Integer.parseInt(i);
     int col = Integer.parseInt(j);
     
-    this.table[row][col] = " ";
+    this.table[col][row] = null;
   }
   
-   void flushGame(){
+   void flushGame1(){
      this.table = new String[3][3];
      this.moveLogger = new String[7];
      this.counter = 0;
-     this.moveCount = 0;
+  }
+  
+  TicTacToeLogic flushGame(){
+    return new TicTacToeLogic();
   }
   
   
@@ -108,5 +118,63 @@ public class TicTacToeLogic {
       }
     }
     return false;
+  }
+  
+  
+  String returnNextOut(){
+    return moveLogger[1];
+  }
+  
+  void highlightNextOut(){
+    String key = returnNextOut();
+    
+    if (key == null){
+      return;
+    }
+    String i = String.valueOf(key.charAt(0));
+    String j = String.valueOf(key.charAt(key.length()-1));
+    
+    int row = Integer.parseInt(i);
+    int col = Integer.parseInt(j);
+    
+    
+    if (this.table[col][row] != null && counter > 6) {
+      StringBuilder string = new StringBuilder(this.table[col][row]);
+      string.append("*");
+      this.table[col][row] = string.toString();
+    }
+  }
+  
+  
+  
+  
+  void printBoard(){ // Just for test
+    System.out.println("\n\n");
+    
+    for (String columns[] : table){
+      for (String items : columns){
+        if (items != null){
+          System.out.print("\t"+items + "\t");
+        }
+        else{
+          System.out.print("\t__\t");
+        }
+      }
+      System.out.println("\n\n");
+    }
+    
+    
+    System.out.println("\n\n");
+    for (String things : moveLogger){
+      if (things != null){
+        System.out.print("\t"+things + "\t");
+      }
+      else{
+        System.out.print("\t__\t");
+      }
+    }
+    
+    System.out.println("\tCounter: "+counter+" Win: "+this.winCondition());
+//    System.out.println(highlightNextOut(returnNextOut()));
   }
 }
